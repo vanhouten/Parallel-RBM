@@ -1,9 +1,3 @@
-#define NUMRATINGS 100480507
-#define WITHHOLD 1408395
-#define NUMUSERS 480179
-#define NUMMOVIES 17920
-// Number of movies is actually 17,770. Caught in activateV, as vADData[i] == 0 for all i > 17770.
-
 // includes, system
 #include <stdlib.h>
 #include <stdio.h>
@@ -18,6 +12,12 @@
 #include <RBM_kernel.cu>
 #include "list.h"
 
+#define NUMRATINGS 100480507
+#define WITHHOLD 1408395
+#define NUMUSERS 480179
+#define NUMMOVIES 17920
+// Number of movies is actually 17,770. Caught in activateV, as vADData[i] == 0 for all i > 17770.
+
 // The following constants can be defined per desired fit and annealing schedule.
 #define NUMEPOCHS
 #define TNUM
@@ -26,8 +26,7 @@
 #define EPSILONHB
 #define EPSILONW
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
 
 // CUDA Execution Configuration Parameters
 dim3 bE, tE;
@@ -85,11 +84,16 @@ cudaMalloc((void**)&hADData, NUMHIDDEN * sizeof(int));
 cudaMalloc((void**)&vAD, 5 * NUMMOVIES * sizeof(int));
 cudaMalloc((void**)&vADData, 5 * NUMMOVIES * sizeof(int));
 
-//							//
-//							//
-//	Initialize Biases and Weights on Device		//
-//							//
-//							//
+// Initialize Biases and Weights on Device.
+cudaMemset(hidBiasD, 0, NUMHIDDEN * sizeof(double));
+cudaMemset(visBiasD, 0, 5 * NUMMOVIES * sizeof(double));
+
+bE.x = 70;
+tE.x = 256;
+bE.y = NUMHIDDEN;
+
+for(int r=0; r<5; r++)
+	initWeights<<<bE,tE>>>(wD, r);
 
 for(int nE=0; nE<NUMEPOCHS; nE++)
 {
@@ -108,8 +112,8 @@ for(int nE=0; nE<NUMEPOCHS; nE++)
 
 		// Compute Visible Node Activation Product with Weights in Parallel.
 		bE.x = 70;
-		bE.y = NUMHIDDEN;
 		tE.x = 256;
+		bE.y = NUMHIDDEN;
 		nS = 128 * sizeof(double);
 		consolidateForH<<<bE,tE,nS>>>(vAD, wD, probH);
 
@@ -167,7 +171,7 @@ for(int nE=0; nE<NUMEPOCHS; nE++)
 			bE.y = 1;
 			srand((unsigned int) time(NULL));
 			randomVal = (double) rand()/((double) RAND_MAX);
-			cudaMemset(vAD,0,5 * NUMMOVIES * sizeof(int));
+			cudaMemset(vAD, 0, 5 * NUMMOVIES * sizeof(int));
 			activateV<<<bE,tE>>>(probV, randomVal, vAD, vADData);
 
 			// Gibbs Step (Hidden).

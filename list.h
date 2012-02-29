@@ -52,23 +52,3 @@ int listDelNext(List *list)
 	free(oldE);
 	return 0;
 }
-
-//////////////////////////////////////////////////////////////////
-
-List movies[NUMMOVIES] = malloc(NUMMOVIES * sizeof(List));
-
-for(a=0; a<NUMRATINGS; a++)
-{
-	i = dat[a].movie;
-	u = dat[a].user;
-	listAddNext(movies[i], u, dat[a].rating, dat[a].date);
-}
-
-List users[NUMUSERS] = malloc(NUMUSERS * sizeof(List));
-
-for(a=0; a<NUMRATINGS; a++)
-{
-	i = dat[a].movie;
-	u = dat[a].user;
-	listAddNext(users[u], i, dat[a].rating, dat[a].date);
-}

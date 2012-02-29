@@ -1,26 +1,25 @@
 // Kernel
+__global__ void initWeights(double *wD, int r){
+	wD[r * NUMMOVIES * NUMHIDDEN + (blockIdx.x * 256 + threadIdx.x) * NUMHIDDEN + blockIdx.y] = 0.01;
+}
 
-__global__ void changeHidBias(double *hidBiasD, int *hADData, int *hAD)
-{
+__global__ void changeHidBias(double *hidBiasD, int *hADData, int *hAD){
 	hidBiasD[threadIdx.x] += EPSILONHB * (hADData[threadIdx.x] - hAD[threadIdx.x]) / NUMUSERS;
 }
 
-__global__ void changeVisBias(double *visBiasD, int *vADData, int *vAD, int *movieCountD)
-{
+__global__ void changeVisBias(double *visBiasD, int *vADData, int *vAD, int *movieCountD){
 	int offset = blockIdx.y*NUMMOVIES + blockIdx.x*256 + threadIdx.x;
 	visBiasD[offset] += EPSILONVB * (vADData[offset] - vAD[offset]) / movieCountD[blockIdx.x*256 + threadIdx.x];
 }
 
-__global__void changeWeight(double *wD, int r, int *vADData, int *vAD, int *hADData, int *hAD, int *movieCountD)
-{
+__global__void changeWeight(double *wD, int r, int *vADData, int *vAD, int *hADData, int *hAD, int *movieCountD){
 	int offsetA = r * NUMMOVIES * NUMHIDDEN;
 	int offsetB = blockIdx.x * 256 + threadIdx.x;
 	int offsetC = NUMHIDDEN * offsetB;
 	wD[offsetA + offsetC + blockIdx.y] += EPSILONW * (vADData[r * NUMMOVIES + offsetB] * hADData[blockIdx.y] - vAD[r * NUMMOVIES + offsetB] * hAD[blockIdx.y]) / movieCountD[offsetB];
 }
 
-__global__ void consolidateForH(double *vAD, double *wD, double *probH)
-{
+__global__ void consolidateForH(double *vAD, double *wD, double *probH){
 	__shared__ double product[128];
 	int offsetA = blockIdx.x * 256 + threadIdx.x;
 	int offsetB = NUMHIDDEN * offsetA;
@@ -65,7 +64,9 @@ __global__ void perfExp(double *probV){
 }
 
 __global__ void combineH(double *probH){
+	__shared__ double product[128];
 	int offset = blockIdx.y * 70 + threadIdx.x;
+
 	if(threadIdx.x < 35)
 		probH[offset] += probH[offset + 35]
 	__syncthreads();
@@ -91,8 +92,7 @@ __global__ void visBias(double *probV, double *visBiasD){
 	probV[offset] += visBiasD[offset];
 }
 
-__global__ void perfSigH(double *probH)
-{
+__global__ void perfSigH(double *probH){
 	int offset = 70 * threadIdx.x;
 	probH[offset] = 1/(1 + exp(-probH[offset]));
 }

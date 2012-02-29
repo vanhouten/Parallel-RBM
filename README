@@ -1,0 +1,2 @@
+// Parallel-RBM
+//  For use with NVIDIA CUDA-Enabled Graphics Hardware. This code is a parallel adaptation of the first algorithm referenced in "Restricted Boltzmann Machines for Collaborative Filtering" by R. Salakhutdinov, Andriy Mnih and Geoffrey Hinton.

@@ -1,22 +1,22 @@
+#define NUMRATINGS 100480507
+#define WITHHOLD 1408395
+#define NUMUSERS 480179
+#define NUMMOVIES 17920
+// Number of movies is actually 17,770. Caught in activateV, as vADData[i] == 0 for all i > 17770.
+
 // includes, system
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <time.h>
-#include "list.h"
 
 // includes, project
 #include <cutil.h>
 
 // includes, kernels
 #include <RBM_kernel.cu>
-
-#define NUMRATINGS 100480507
-#define WITHHOLD 1408395
-#define NUMUSERS 480179
-#define NUMMOVIES 17920
-// Number of movies is actually 17,770. Caught in activateV, as vADData[i] == 0 for all i > 17770.
+#include "list.h"
 
 // The following constants can be defined per desired fit and annealing schedule.
 #define NUMEPOCHS
